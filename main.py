@@ -6,24 +6,35 @@ from scoreboard import Scoreboard
 
 screen = Screen()
 screen.setup(width=600, height=600)
-screen.bgcolor("green")
+screen.bgcolor("white")
 screen.tracer(0)
 
 player = Player()
+car_manager = CarManager()
 scoreboard = Scoreboard()
 
 screen.listen()
-screen.onkey(player.move_up, "Up")
-screen.onkey(player.move_down, "Down")
+screen.onkey(player.go_up, "Up")
+screen.onkey(player.go_down, "Down")
 
 game_is_on = True
 while game_is_on:
     time.sleep(0.1)
     screen.update()
-    if player.ycor() > 295:
+
+    car_manager.create_car()
+    car_manager.move_cars()
+
+    # detect collision by checking distance
+    for car in car_manager.all_cars:
+        if car.distance(player) < 20:
+            game_is_on = False
+            scoreboard.game_over()
+
+    # detect successful
+    if player.is_at_finish_line():
         scoreboard.next_round()
-        player.player_reset()
-
-
+        player.go_to_start()
+        car_manager.level_up()
 
 screen.exitonclick()
